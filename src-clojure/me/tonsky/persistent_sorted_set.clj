@@ -42,6 +42,14 @@
   ([set from to cmp]
     (.rslice ^PersistentSortedSet set from to ^Comparator cmp)))
 
+(defn seek
+  "An efficient way to seek to a specific key in a seq (either returned by [[clojure.core.seq]] or a slice.)
+  `(seek (seq set) to)` returns iterator for all Xs where to <= X.
+  Optionally pass in comparator that will override the one that set uses."
+  ([seq to]
+    (.seek ^Seq seq to))
+  ([set to cmp]
+    (.seek ^Seq set to ^Comparator cmp)))
 
 (defn- array-from-indexed [coll type from to]
   (cond

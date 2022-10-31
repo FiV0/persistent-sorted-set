@@ -15,6 +15,10 @@ public class Leaf {
     _edit = edit;
   }
 
+  public Object minKey() {
+    return _keys[0];
+  }
+
   public Object maxKey() {
     return _keys[_len-1];
   }
