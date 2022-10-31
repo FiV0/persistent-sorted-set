@@ -9,7 +9,7 @@
     [java.lang.ref SoftReference]
     [java.util Comparator Arrays]
     [java.util.function BiConsumer]
-    [me.tonsky.persistent_sorted_set ANode ArrayUtil Branch IStorage Leaf PersistentSortedSet]))
+    [me.tonsky.persistent_sorted_set ANode ArrayUtil Branch IStorage Leaf PersistentSortedSet Seq]))
 
 (set! *warn-on-reflection* true)
 
@@ -46,6 +46,14 @@
   ([^PersistentSortedSet set from to ^Comparator cmp]
    (.rslice set from to cmp)))
 
+(defn seek
+  "An efficient way to seek to a specific key in a seq (either returned by [[clojure.core.seq]] or a slice.)
+  `(seek (seq set) to)` returns iterator for all Xs where to <= X.
+  Optionally pass in comparator that will override the one that set uses."
+  ([seq to]
+    (.seek ^Seq seq to))
+  ([set to cmp]
+    (.seek ^Seq set to ^Comparator cmp)))
 
 (defn- array-from-indexed [coll type from to]
   (cond
@@ -124,13 +132,13 @@
   ([] (PersistentSortedSet/EMPTY))
   ([& keys] (from-sequential compare keys)))
 
-  
+
 (defn restore-by
   [cmp address ^IStorage storage]
   (PersistentSortedSet. nil cmp address storage nil -1 nil 0))
 
 
-(defn restore 
+(defn restore
   [address ^IStorage storage]
   (restore-by RT/DEFAULT_COMPARATOR address storage))
 
