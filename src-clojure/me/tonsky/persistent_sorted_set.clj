@@ -6,7 +6,7 @@
     [me.tonsky.persistent-sorted-set.arrays :as arrays])
   (:import
     [java.util Comparator Arrays]
-    [me.tonsky.persistent_sorted_set PersistentSortedSet Leaf Node Edit ArrayUtil]))
+    [me.tonsky.persistent_sorted_set PersistentSortedSet Leaf Node Edit ArrayUtil Seq]))
 
 
 (defn conj
