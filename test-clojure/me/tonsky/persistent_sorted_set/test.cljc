@@ -450,3 +450,9 @@
         (is (= expected-seq (seq (set/seek (seq set) seek-to))))
         (is (= expected-rseq (seq (set/seek (rseq set) seek-to)))))))
   (println "[ DONE ] stresstest-seek"))
+
+(deftest custom-comparator-test
+  (let [key-fn -
+        cmp #(compare (key-fn %1) (key-fn %2))
+        s (into (set/sorted-set-by cmp) '(1 2 3))]
+    (is (= '(3 2 1) (set/slice s -5 1)))))
