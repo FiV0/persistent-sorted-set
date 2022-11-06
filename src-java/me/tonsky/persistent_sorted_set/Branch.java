@@ -21,7 +21,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
   public Object[] _children;
 
   // For i in [0.._len):
-  // 
+  //
   // 1. Not stored:       (_addresses == null || _addresses[i] == null) && _children[i] == ANode
   // 2. Stored:            _addresses[i] == Object && _children[i] == SoftReference<ANode>
   // 3. Not restored yet:  _addresses[i] == Object && (_children == null || _children[i] == null)
@@ -66,7 +66,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       return Arrays.asList(Arrays.copyOfRange(_addresses, 0, _len));
     }
   }
-  
+
   public Address address(int idx) {
     assert 0 <= idx && idx < _len;
 
@@ -151,11 +151,22 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
   public boolean contains(IStorage storage, Key key, Comparator<Key> cmp) {
     int idx = search(key, cmp);
     if (idx >= 0) return true;
-    int ins = -idx - 1; 
+    int ins = -idx - 1;
     if (ins == _len) return false;
     assert 0 <= ins && ins < _len;
     return child(storage, ins).contains(storage, key, cmp);
   }
+
+  @Override
+  public Object get(IStorage storage, Key key, Comparator<Key> cmp) {
+    int idx = search(key, cmp);
+    if (idx >= 0) return _keys[idx];
+    int ins = -idx - 1;
+    if (ins == _len) return null;
+    assert 0 <= ins && ins < _len;
+    return child(storage, ins).get(storage, key, cmp);
+  }
+
 
   @Override
   public ANode[] add(IStorage storage, Key key, Comparator<Key> cmp, AtomicBoolean edit) {
@@ -163,7 +174,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
     if (idx >= 0) { // already in set
       return PersistentSortedSet.UNCHANGED;
     }
-    
+
     int ins = -idx - 1;
     if (ins == _len) ins = _len - 1;
     assert 0 <= ins && ins < _len;
@@ -176,7 +187,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
     if (PersistentSortedSet.EARLY_EXIT == nodes) { // child signalling nothing to update
       return PersistentSortedSet.EARLY_EXIT;
     }
-    
+
     // same len, editable
     if (1 == nodes.length && editable()) {
       ANode<Key, Address> node = nodes[0];
@@ -346,9 +357,9 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       return PersistentSortedSet.UNCHANGED;
 
     assert 0 <= idx && idx < _len;
-    
+
     ANode leftChild  = idx > 0      ? child(storage, idx - 1) : null,
-          rightChild = idx < _len-1 ? child(storage, idx + 1) : null;
+      rightChild = idx < _len-1 ? child(storage, idx + 1) : null;
     int leftChildLen = safeLen(leftChild);
     int rightChildLen = safeLen(rightChild);
     ANode[] nodes = child(storage, idx).remove(storage, key, leftChild, rightChild, cmp, edit);
@@ -365,11 +376,11 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
 
     // nodes[1] always not nil
     int newLen = _len - 1
-                 - (leftChild  != null ? 1 : 0)
-                 - (rightChild != null ? 1 : 0)
-                 + (nodes[0] != null ? 1 : 0)
-                 + 1
-                 + (nodes[2] != null ? 1 : 0);
+      - (leftChild  != null ? 1 : 0)
+      - (rightChild != null ? 1 : 0)
+      + (nodes[0] != null ? 1 : 0)
+      + 1
+      + (nodes[2] != null ? 1 : 0);
 
     // no rebalance needed
     if (newLen >= PersistentSortedSet.MIN_LEN || (left == null && right == null)) {
@@ -377,7 +388,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       if (editable() && idx < _len-2) {
         Stitch ks = new Stitch(_keys, Math.max(idx-1, 0));
         if (nodes[0] != null) ks.copyOne(nodes[0].maxKey());
-                              ks.copyOne(nodes[1].maxKey());
+        ks.copyOne(nodes[1].maxKey());
         if (nodes[2] != null) ks.copyOne(nodes[2].maxKey());
         if (newLen != _len)
           ks.copyAll(_keys, idx+2, _len);
@@ -385,7 +396,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
         if (_addresses != null) {
           Stitch as = new Stitch(_addresses, Math.max(idx - 1, 0));
           if (nodes[0] != null) as.copyOne(leftChanged ? null : address(idx - 1));
-                                as.copyOne(null);
+          as.copyOne(null);
           if (nodes[2] != null) as.copyOne(rightChanged ? null : address(idx + 1));
           if (newLen != _len)
             as.copyAll(_addresses, idx+2, _len);
@@ -394,7 +405,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
         ensureChildren();
         Stitch cs = new Stitch(_children, Math.max(idx - 1, 0));
         if (nodes[0] != null) cs.copyOne(nodes[0]);
-                              cs.copyOne(nodes[1]);
+        cs.copyOne(nodes[1]);
         if (nodes[2] != null) cs.copyOne(nodes[2]);
         if (newLen != _len)
           cs.copyAll(_children, idx+2, _len);
@@ -408,7 +419,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       Stitch ks = new Stitch(newCenter._keys, 0);
       ks.copyAll(_keys, 0, idx - 1);
       if (nodes[0] != null) ks.copyOne(nodes[0].maxKey());
-                            ks.copyOne(nodes[1].maxKey());
+      ks.copyOne(nodes[1].maxKey());
       if (nodes[2] != null) ks.copyOne(nodes[2].maxKey());
       ks.copyAll(_keys, idx + 2, _len);
 
@@ -416,7 +427,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
         Stitch as = new Stitch(newCenter.ensureAddresses(), 0);
         as.copyAll(_addresses, 0, idx - 1);
         if (nodes[0] != null) as.copyOne(leftChanged ? null : address(idx - 1));
-                              as.copyOne(null);
+        as.copyOne(null);
         if (nodes[2] != null) as.copyOne(rightChanged ? null : address(idx + 1));
         as.copyAll(_addresses, idx + 2, _len);
       }
@@ -425,7 +436,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       Stitch cs = new Stitch(newCenter._children, 0);
       cs.copyAll(_children, 0, idx - 1);
       if (nodes[0] != null) cs.copyOne(nodes[0]);
-                            cs.copyOne(nodes[1]);
+      cs.copyOne(nodes[1]);
       if (nodes[2] != null) cs.copyOne(nodes[2]);
       cs.copyAll(_children, idx + 2, _len);
 
@@ -440,7 +451,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       ks.copyAll(left._keys, 0, left._len);
       ks.copyAll(_keys,      0, idx - 1);
       if (nodes[0] != null) ks.copyOne(nodes[0].maxKey());
-                            ks.copyOne(nodes[1].maxKey());
+      ks.copyOne(nodes[1].maxKey());
       if (nodes[2] != null) ks.copyOne(nodes[2].maxKey());
       ks.copyAll(_keys,     idx + 2, _len);
 
@@ -449,7 +460,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
         as.copyAll(left._addresses, 0, left._len);
         as.copyAll(_addresses,      0, idx - 1);
         if (nodes[0] != null) as.copyOne(leftChanged ? null : address(idx - 1));
-                              as.copyOne(null);
+        as.copyOne(null);
         if (nodes[2] != null) as.copyOne(rightChanged ? null : address(idx + 1));
         as.copyAll(_addresses, idx + 2, _len);
       }
@@ -459,7 +470,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       cs.copyAll(left._children, 0, left._len);
       cs.copyAll(_children,      0, idx - 1);
       if (nodes[0] != null) cs.copyOne(nodes[0]);
-                            cs.copyOne(nodes[1]);
+      cs.copyOne(nodes[1]);
       if (nodes[2] != null) cs.copyOne(nodes[2]);
       cs.copyAll(_children, idx + 2, _len);
 
@@ -473,7 +484,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       Stitch ks = new Stitch(join._keys, 0);
       ks.copyAll(_keys, 0, idx - 1);
       if (nodes[0] != null) ks.copyOne(nodes[0].maxKey());
-                            ks.copyOne(nodes[1].maxKey());
+      ks.copyOne(nodes[1].maxKey());
       if (nodes[2] != null) ks.copyOne(nodes[2].maxKey());
       ks.copyAll(_keys,       idx + 2, _len);
       ks.copyAll(right._keys, 0, right._len);
@@ -482,7 +493,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
         Stitch as = new Stitch(join.ensureAddresses(), 0);
         as.copyAll(_addresses, 0, idx - 1);
         if (nodes[0] != null) as.copyOne(leftChanged ? null : address(idx - 1));
-                              as.copyOne(null);
+        as.copyOne(null);
         if (nodes[2] != null) as.copyOne(rightChanged ? null : address(idx + 1));
         as.copyAll(_addresses, idx + 2, _len);
         as.copyAll(right._addresses, 0, right._len);
@@ -492,11 +503,11 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       Stitch cs = new Stitch(join._children, 0);
       cs.copyAll(_children, 0, idx - 1);
       if (nodes[0] != null) cs.copyOne(nodes[0]);
-                            cs.copyOne(nodes[1]);
+      cs.copyOne(nodes[1]);
       if (nodes[2] != null) cs.copyOne(nodes[2]);
       cs.copyAll(_children,     idx + 2, _len);
       cs.copyAll(right._children, 0, right._len);
-      
+
       return new ANode[] { left, join, null };
     }
 
@@ -515,7 +526,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       ks.copyAll(left._keys, newLeftLen, left._len);
       ks.copyAll(_keys, 0, idx - 1);
       if (nodes[0] != null) ks.copyOne(nodes[0].maxKey());
-                            ks.copyOne(nodes[1].maxKey());
+      ks.copyOne(nodes[1].maxKey());
       if (nodes[2] != null) ks.copyOne(nodes[2].maxKey());
       ks.copyAll(_keys, idx + 2, _len);
 
@@ -531,7 +542,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
         as.copyAll(left._addresses, newLeftLen, left._len);
         as.copyAll(_addresses, 0, idx - 1);
         if (nodes[0] != null) as.copyOne(leftChanged ? null : address(idx - 1));
-                              as.copyOne(null);
+        as.copyOne(null);
         if (nodes[2] != null) as.copyOne(rightChanged ? null : address(idx + 1));
         as.copyAll(_addresses, idx + 2, _len);
       }
@@ -541,7 +552,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       cs.copyAll(left._children, newLeftLen, left._len);
       cs.copyAll(_children, 0, idx - 1);
       if (nodes[0] != null) cs.copyOne(nodes[0]);
-                            cs.copyOne(nodes[1]);
+      cs.copyOne(nodes[1]);
       if (nodes[2] != null) cs.copyOne(nodes[2]);
       cs.copyAll(_children, idx + 2, _len);
 
@@ -551,17 +562,17 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
     // borrow from right
     if (right != null) {
       int totalLen     = newLen + right._len,
-          newCenterLen = totalLen >>> 1,
-          newRightLen  = totalLen - newCenterLen,
-          rightHead    = right._len - newRightLen;
+        newCenterLen = totalLen >>> 1,
+        newRightLen  = totalLen - newCenterLen,
+        rightHead    = right._len - newRightLen;
 
       Branch newCenter = new Branch(_level, newCenterLen, edit),
-             newRight  = new Branch(_level, newRightLen, edit);
+        newRight  = new Branch(_level, newRightLen, edit);
 
       Stitch ks = new Stitch(newCenter._keys, 0);
       ks.copyAll(_keys, 0, idx - 1);
       if (nodes[0] != null) ks.copyOne(nodes[0].maxKey());
-                            ks.copyOne(nodes[1].maxKey());
+      ks.copyOne(nodes[1].maxKey());
       if (nodes[2] != null) ks.copyOne(nodes[2].maxKey());
       ks.copyAll(_keys, idx + 2, _len);
       ks.copyAll(right._keys, 0, rightHead);
@@ -572,7 +583,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
         Stitch as = new Stitch(newCenter.ensureAddresses(), 0);
         as.copyAll(_addresses, 0, idx - 1);
         if (nodes[0] != null) as.copyOne(leftChanged ? null : address(idx - 1));
-                              as.copyOne(null);
+        as.copyOne(null);
         if (nodes[2] != null) as.copyOne(rightChanged ? null : address(idx + 1));
         as.copyAll(_addresses, idx + 2, _len);
         as.copyAll(right._addresses, 0, rightHead);
@@ -582,7 +593,7 @@ public class Branch<Key, Address> extends ANode<Key, Address> {
       Stitch cs = new Stitch(newCenter._children, 0);
       cs.copyAll(_children, 0, idx - 1);
       if (nodes[0] != null) cs.copyOne(nodes[0]);
-                            cs.copyOne(nodes[1]);
+      cs.copyOne(nodes[1]);
       if (nodes[2] != null) cs.copyOne(nodes[2]);
       cs.copyAll(_children, idx + 2, _len);
       cs.copyAll(right._children, 0, rightHead);

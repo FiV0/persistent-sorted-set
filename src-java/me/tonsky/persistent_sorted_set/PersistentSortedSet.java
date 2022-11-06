@@ -305,6 +305,10 @@ public class PersistentSortedSet<Key, Address> extends APersistentSortedSet<Key,
     return root().contains(_storage, (Key) key, _cmp);
   }
 
+  public Object getKey (Object key) {
+    return root().get(_storage, (Key) key, _cmp);
+  }
+
   // IEditableCollection
   public PersistentSortedSet asTransient() {
     if (editable())

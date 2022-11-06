@@ -4,7 +4,7 @@ import java.util.*;
 import clojure.lang.*;
 
 @SuppressWarnings("unchecked")
-public abstract class APersistentSortedSet<Key, Address> extends AFn implements IObj, Counted, IPersistentSet, ILookup, Iterable, Set, java.io.Serializable, IHashEq {
+public abstract class APersistentSortedSet<Key, Address> extends AFn implements IObj, Counted, IPersistentSet, ILookup, Iterable, Set, java.io.Serializable, IHashEq , IGet{
   int _hash;
   int _hasheq;
   final IPersistentMap _meta;
@@ -27,15 +27,31 @@ public abstract class APersistentSortedSet<Key, Address> extends AFn implements 
   }
 
   // IPersistentSet
-  public Object get(Object key) { return contains(key) ? key : null; }
-     
+  public Object get(Object key) {
+    return getKey(key);
+  }
+
   //  ILookup
-  public Object valAt(Object key) { return contains(key) ? key : null; }
-  public Object valAt(Object key, Object notFound) { return contains(key) ? key : notFound; }
+  public Object valAt(Object key) {
+    return getKey(key);
+  }
+  public Object valAt(Object key, Object notFound) {
+    Object res = getKey(key);
+    if (res != null)
+      return res;
+    return notFound;
+  }
 
   // IFn
-  public Object invoke(Object key) { return contains(key) ? key : null; }
-  public Object invoke(Object key, Object notFound) { return contains(key) ? key : notFound; }
+  public Object invoke(Object key) {
+    return getKey(key);
+  }
+  public Object invoke(Object key, Object notFound) {
+    Object res = getKey(key);
+    if (res != null)
+      return res;
+    return notFound;
+  }
 
   // IHashEq
   public int hasheq() {
@@ -51,6 +67,7 @@ public abstract class APersistentSortedSet<Key, Address> extends AFn implements 
         return false;
     return true;
   }
+
   public int      size()                  { return count(); }
   public boolean  isEmpty()               { return count() == 0; }
   public Object[] toArray()               { return RT.seqToArray(seq()); }

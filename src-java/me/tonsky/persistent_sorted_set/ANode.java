@@ -116,6 +116,7 @@ public abstract class ANode<Key, Address> {
   // 0 for Leafs, 1+ for Branches
   public abstract int level();
   public abstract boolean contains(IStorage storage, Key key, Comparator<Key> cmp);
+  public abstract Object get(IStorage storage, Key key, Comparator<Key> cmp);
   public abstract ANode[] add(IStorage storage, Key key, Comparator<Key> cmp, AtomicBoolean edit);
   public abstract ANode[] remove(IStorage storage, Key key, ANode left, ANode right, Comparator<Key> cmp, AtomicBoolean edit);
   public abstract String str(IStorage storage, int lvl);
@@ -125,9 +126,9 @@ public abstract class ANode<Key, Address> {
 
   protected static int newLen(int len, AtomicBoolean edit) {
     if (edit != null && edit.get())
-        return Math.min(PersistentSortedSet.MAX_LEN, len + PersistentSortedSet.EXPAND_LEN);
+      return Math.min(PersistentSortedSet.MAX_LEN, len + PersistentSortedSet.EXPAND_LEN);
     else
-        return len;
+      return len;
   }
 
   protected static int safeLen(ANode node) {

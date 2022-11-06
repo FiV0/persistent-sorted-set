@@ -35,6 +35,16 @@ public class Leaf<Key, Address> extends ANode<Key, Address> {
   }
 
   @Override
+  public Object get (IStorage storage, Key key, Comparator<Key> cmp) {
+    int idx = search(key, cmp);
+    if (idx >= 0) {
+      return _keys[idx];
+    }
+    return null;
+  }
+
+
+  @Override
   public ANode[] add(IStorage storage, Key key, Comparator<Key> cmp, AtomicBoolean edit) {
     int idx = search(key, cmp);
     if (idx >= 0) // already in set
@@ -69,12 +79,12 @@ public class Leaf<Key, Address> extends ANode<Key, Address> {
 
     // splitting
     int half1 = (_len + 1) >>> 1,
-        half2 = _len + 1 - half1;
+      half2 = _len + 1 - half1;
 
     // goes to first half
     if (ins < half1) {
       Leaf n1 = new Leaf(half1, edit),
-           n2 = new Leaf(half2, edit);
+        n2 = new Leaf(half2, edit);
       new Stitch(n1._keys, 0)
         .copyAll(_keys, 0, ins)
         .copyOne(key)
@@ -85,7 +95,7 @@ public class Leaf<Key, Address> extends ANode<Key, Address> {
 
     // copy first, insert to second
     Leaf n1 = new Leaf(half1, edit),
-         n2 = new Leaf(half2, edit);
+      n2 = new Leaf(half2, edit);
     ArrayUtil.copy(_keys, 0, half1, n1._keys, 0);
     new Stitch(n2._keys, 0)
       .copyAll(_keys, half1, ins)
@@ -148,9 +158,9 @@ public class Leaf<Key, Address> extends ANode<Key, Address> {
     // borrow from left
     if (left != null && (left.editable() || right == null || left._len >= right._len)) {
       int totalLen     = left._len + newLen,
-          newLeftLen   = totalLen >>> 1,
-          newCenterLen = totalLen - newLeftLen,
-          leftTail     = left._len - newLeftLen;
+        newLeftLen   = totalLen >>> 1,
+        newCenterLen = totalLen - newLeftLen,
+        leftTail     = left._len - newLeftLen;
 
       Leaf newLeft, newCenter;
 
@@ -184,9 +194,9 @@ public class Leaf<Key, Address> extends ANode<Key, Address> {
     // borrow from right
     if (right != null) {
       int totalLen     = newLen + right._len,
-          newCenterLen = totalLen >>> 1,
-          newRightLen  = totalLen - newCenterLen,
-          rightHead    = right._len - newRightLen;
+        newCenterLen = totalLen >>> 1,
+        newRightLen  = totalLen - newCenterLen,
+        rightHead    = right._len - newRightLen;
 
       Leaf newCenter, newRight;
 

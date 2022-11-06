@@ -53,7 +53,7 @@
       (let [s (into (set/sorted-set) (shuffle (irange 0 5000)))]
         (are [from to expected] (= expected (set/slice s from to))
           nil    nil    (irange 0 5000)
-          
+
           -1     nil    (irange 0 5000)
           0      nil    (irange 0 5000)
           0.5    nil    (irange 1 5000)
@@ -85,7 +85,7 @@
       (let [s (into (set/sorted-set) (shuffle (irange 0 10)))]
         (are [from to expected] (= expected (set/slice s from to))
           nil  nil  (irange 0 10)
-          
+
           -1   nil  (irange 0 10)
           0    nil  (irange 0 10)
           0.5  nil  (irange 1 10)
@@ -94,7 +94,7 @@
           9.5  nil  [10]
           10   nil  [10]
           10.5 nil  nil
-          
+
           nil -1   nil
           nil 0    [0]
           nil 0.5  [0]
@@ -117,7 +117,7 @@
       (let [s (into (set/sorted-set) (shuffle (irange 0 5000)))]
         (are [from to expected] (= expected (set/rslice s from to))
           nil    nil    (irange 5000 0)
-          
+
           5001   nil    (irange 5000 0)
           5000   nil    (irange 5000 0)
           4999.5 nil    (irange 4999 0)
@@ -126,7 +126,7 @@
           0.5    nil    [0]
           0      nil    [0]
           -1     nil    nil
-          
+
           nil    5001   nil
           nil    5000   [5000]
           nil    4999.5 [5000]
@@ -149,7 +149,7 @@
       (let [s (into (set/sorted-set) (shuffle (irange 0 10)))]
         (are [from to expected] (= expected (set/rslice s from to))
           nil nil (irange 10 0)
-          
+
           11  nil (irange 10 0)
           10  nil (irange 10 0)
           9.5 nil (irange 9 0)
@@ -158,7 +158,7 @@
           0.5 nil [0]
           0   nil [0]
           -1  nil nil
-          
+
           nil 11  nil
           nil 10  [10]
           nil 9.5 [10]
@@ -185,18 +185,18 @@
           2500   nil
           5000   nil
           5001   nil
-          
+
           nil    -1
-          nil    0     
-          nil    1     
+          nil    0
+          nil    1
           nil    2500
           nil    5000
-          nil    5001  
-          
+          nil    5001
+
           nil    nil
- 
+
           -1     5001
-          0      5000  
+          0      5000
           1      4999
           2500   2500
           2500.1 2500.9)))
@@ -209,20 +209,20 @@
           2500   nil
           5000   nil
           5001   nil
-          
+
           nil    -1
-          nil    0     
-          nil    1     
+          nil    0
+          nil    1
           nil    2500
           nil    5000
-          nil    5001  
-          
+          nil    5001
+
           nil    nil
 
-          5001   -1    
-          5000   0       
-          4999   1     
-          2500   2500  
+          5001   -1
+          5000   0
+          4999   1
+          2500   2500
           2500.9 2500.1)))
 
     (testing "Slice with equal elements"
@@ -312,18 +312,18 @@
 
 
 #?(:clj
-    (deftest iter-over-transient
-      (let [set (transient (into (set/sorted-set) (range 100)))
-            seq (seq set)]
-        (conj! set 100)
-        (is (thrown-with-msg? Exception #"iterating and mutating" (first seq)))
-        (is (thrown-with-msg? Exception #"iterating and mutating" (next seq)))
-        (is (thrown-with-msg? Exception #"iterating and mutating" (reduce + seq)))
-        (is (thrown-with-msg? Exception #"iterating and mutating" (reduce + 0 seq)))
-        (is (thrown-with-msg? Exception #"iterating and mutating" (chunk-first seq)))
-        (is (thrown-with-msg? Exception #"iterating and mutating" (chunk-next seq)))
-        (is (thrown-with-msg? Exception #"iterating and mutating" (.iterator ^Iterable seq))))))
-        
+   (deftest iter-over-transient
+     (let [set (transient (into (set/sorted-set) (range 100)))
+           seq (seq set)]
+       (conj! set 100)
+       (is (thrown-with-msg? Exception #"iterating and mutating" (first seq)))
+       (is (thrown-with-msg? Exception #"iterating and mutating" (next seq)))
+       (is (thrown-with-msg? Exception #"iterating and mutating" (reduce + seq)))
+       (is (thrown-with-msg? Exception #"iterating and mutating" (reduce + 0 seq)))
+       (is (thrown-with-msg? Exception #"iterating and mutating" (chunk-first seq)))
+       (is (thrown-with-msg? Exception #"iterating and mutating" (chunk-next seq)))
+       (is (thrown-with-msg? Exception #"iterating and mutating" (.iterator ^Iterable seq))))))
+
 
 (defn into-via-doseq [to from]
   (let [res (transient [])]
@@ -348,9 +348,9 @@
                     set3 (reduce disj set0 full-rm)
                     set4 (persistent! (reduce disj (transient set0) full-rm))]]
         (println "Iter:" (str (inc i)  "/" iters)
-          "set:" method 
-          "adds:" (str (count xs) " (" (count xs-sorted) " distinct),")
-          "removals:" (str (count rm) " (down to " (count xs-rm) ")"))
+                 "set:" method
+                 "adds:" (str (count xs) " (" (count xs-sorted) " distinct),")
+                 "removals:" (str (count rm) " (down to " (count xs-rm) ")"))
         (testing method
           (testing "conj, seq"
             (is (= (vec set0) xs-sorted)))
@@ -371,7 +371,7 @@
           (testing "full disj"
             (is (= set3 #{}))
             (is (= set4 #{})))))))
-        
+
   (println "[ DONE ] stresstest-btset"))
 
 
@@ -386,10 +386,10 @@
                             #?(:clj ["lazy" (test-storage/roundtrip (into (set/sorted-set) xs))])]
               :let [set-range (set/slice set from to)]]
         (println
-          "Iter:" (str (inc i) "/" iters)
-          "set:" method
-          "from:" (count xs-sorted) "elements"
-          "down to:" (count expected))
+         "Iter:" (str (inc i) "/" iters)
+         "set:" method
+         "from:" (count xs-sorted) "elements"
+         "down to:" (count expected))
         (testing method
           (testing (str "from " from " to " to)
             (is (= (vec set-range) (vec (seq set-range)))) ;; checking IReduce on BTSetIter
@@ -397,7 +397,7 @@
             (is (= (into-via-doseq [] set-range) expected))
             (is (= (vec (rseq set-range)) (reverse expected)))
             (is (= (vec (rseq (rseq set-range))) expected)))))))
-            
+
   (println "[ DONE ] stresstest-slice"))
 
 (deftest seek-for-seq-test
@@ -450,3 +450,9 @@
         (is (= expected-seq (seq (set/seek (seq set) seek-to))))
         (is (= expected-rseq (seq (set/seek (rseq set) seek-to)))))))
   (println "[ DONE ] stresstest-seek"))
+
+(deftest consistent-lookup-test
+  (let [key-fn first
+        cmp #(compare (key-fn %1) (key-fn %2))
+        s (set/sorted-set-by cmp [1 2] [2 3])]
+    (is (= [1 2] (get s [1 :foo])))))
