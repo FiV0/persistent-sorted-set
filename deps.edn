@@ -1,6 +1,10 @@
 {:paths ["src-clojure" "target/classes"]
  :deps
  {org.clojure/clojure {:mvn/version "1.11.1"}}
+ :deps/prep-lib
+ {:ensure "target/classes"
+  :alias :build
+  :fn java}
  :aliases
  {:dev
   {:extra-deps
